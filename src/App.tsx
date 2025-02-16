@@ -3,7 +3,7 @@ import { TextHost } from "./components/TextHost";
 import { styled } from "solid-styled-components";
 import { Portal } from "solid-js/web";
 import { For } from "solid-js";
-import { Rectangle, set_state, state } from "./state";
+import { Rectangle, Relationship, set_state, state } from "./state";
 
 
 
@@ -95,7 +95,7 @@ function App() {
                 )}
             >
                 <For each={state.entity_labels}>{entity_label=>
-                    <SelectorOption text={entity_label} value={`E-${entity_label}`}/>
+                    <SelectorOption text={entity_label} value={`${entity_label}`}/>
                 }</For>
             </SelectorHost>
             <MenuHeader>Connect</MenuHeader>
@@ -112,7 +112,7 @@ function App() {
                 )}
             >
                 <For each={state.relationship_labels}>{relationship_label=>(
-                    <SelectorOption text={relationship_label} value={`R-${relationship_label}`}/>
+                    <SelectorOption text={relationship_label} value={`${relationship_label}`}/>
                 )}</For>
             </SelectorHost>
             <button
@@ -170,8 +170,9 @@ function App() {
         <MainView>
             <TextHost
                 selected_ranges={()=>state.selected_ranges}
-                add_selected_range={(range)=>set_state("selected_ranges", state.selected_ranges.length, range)}
+                add_selected_range={range=>set_state("selected_ranges", state.selected_ranges.length, range)}
                 connected_ranges={()=>state.connected_ranges}
+                connect_ranges={new_rel=>set_state("connected_ranges", state.connected_ranges.length, new_rel)}
                 text_content={()=>state.active_document_text}
                 active_tool={()=>state.active_tool}
             />

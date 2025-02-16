@@ -40,7 +40,7 @@ export const IconTextSelection = () => <svg viewBox="0 0 16 24"  height="100%">
 </svg>
 
 export const SelectorOption: Component<{ text: string; value: string }> = (props) => {
-    const color = magic_color(props.value);
+    const color = magic_color(props.text);
     const ctx = useContext(SelectorContext);
     if (!ctx) throw new Error("SelectorOption must be used within a SelectorHost");
 

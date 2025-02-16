@@ -6,6 +6,7 @@ import { range_to_canvas_rect as range_to_canvas_rects } from "../util/range";
 import { offset_within_top_node } from "../util/offset_within_top_node";
 import { Entity, Rectangle, Relationship, State } from "../state";
 import { css } from "solid-styled-components";
+import { magic_color } from "../util/magic_color";
 
 
 export const TextHost: Component<
@@ -14,7 +15,8 @@ export const TextHost: Component<
         text_content: Accessor<string>;
         selected_ranges: Accessor<Entity[]>;
         connected_ranges: Accessor<Relationship[]>;
-        add_selected_range: (range: { start: number; end: number; }) => void;
+        connect_ranges:(new_rel:Relationship)=>void;
+        add_selected_range: (range: Entity) => void;
         active_tool: Accessor<State["active_tool"]>;
     }
 > = props => {
@@ -29,7 +31,7 @@ export const TextHost: Component<
             "overflow-y": "scroll",
             "flex-grow": 1,
             "padding": "1em 3em",
-            "z-index": "0",
+            "z-index": "3000",
             "line-height": "2.5em",
         }}
         innerHTML={props.text_content()}
@@ -47,7 +49,7 @@ export const TextHost: Component<
             left: "0",
             width: "100%",
             height: "100%",
-            "z-index": "-2",
+            "z-index": "1000",
         }}
     ></canvas> as HTMLCanvasElement;
 
@@ -112,7 +114,8 @@ export const TextHost: Component<
             const to_rect = to_rects[0];
             const { start, control_1, control_2, end } = compute_bezier_between_boxes(from_rect, to_rect);
 
-            ctx.strokeStyle = "rgba(255,0,225,0.8)";
+            //ctx.strokeStyle = "rgba(255,0,225,0.8)";
+            ctx.strokeStyle = magic_color(connection.label);
             ctx.lineWidth = 2;
 
             draw_bezier_with_arrow(ctx, start, control_1, control_2, end);
@@ -122,6 +125,8 @@ export const TextHost: Component<
 
     const handel_pointer_up = () => {
         // get the selection and see if we need to update the selected ranges
+        const active_tool = props.active_tool();
+        if(active_tool.type!=="create-entity") return;
         const selection = window.getSelection();
         if (!selection) return;
         if (selection.isCollapsed) return;
@@ -132,8 +137,11 @@ export const TextHost: Component<
         console.log("range", range);
         console.log("start", start);
         console.log("end", end);
+        console.log("label", active_tool.label)
+        // TODO: can probs compute screen positions here too
+
         
-        props.add_selected_range({ start, end });
+        props.add_selected_range({ start, end, label: active_tool.label, screen_positions:[]});
         selection.removeAllRanges();
     };
 
@@ -175,7 +183,7 @@ export const TextHost: Component<
                 left: "0",
                 width: "100%",
                 height: "100%",
-                "z-index": "-1",
+                "z-index": "2000",
             }}
         >{
             all_mounted() && <For each={entity_rects()}>{(rects, index) => {
@@ -186,10 +194,12 @@ export const TextHost: Component<
                             left:   `${rect.x}px`,
                             width:  `${rect.w}px`,
                             height: `${rect.h}px`,
+                            cursor: props.active_tool().type==="create-relationship"? "grab" : undefined,
+                            "background-color":magic_color(props.selected_ranges()[index()].label ?? ""),
                         }}
                         class={css`
                             position: absolute;
-                            background-color: rgba(128,128,0,0.5);
+                            
                             border-radius: 5px;
                             &:hover {
                                 background-color: rgba(128,128,0,0.8);
@@ -197,8 +207,8 @@ export const TextHost: Component<
                         `}
                         // we are going to allow the user to drag and drop these spans onto each other
                         ondragstart={(e) => {
-                            console.log("drag start", index());
-                            e.dataTransfer?.setData("text/plain", `${index}`);
+                            // console.log("drag start", index());
+                            e.dataTransfer?.setData("text/plain", `${index()}`);
                         }}
                         ondragover={e=>{
                             e.preventDefault();
@@ -211,7 +221,7 @@ export const TextHost: Component<
                             e.preventDefault();
                             const from = e.dataTransfer?.getData("text/plain");
                             if (from) {
-                                props.connected_ranges().push({
+                                props.connect_ranges({
                                     from: Number(from),
                                     to: index(),
                                     label: active_tool.label
