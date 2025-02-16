@@ -2,20 +2,29 @@ import { makePersisted } from "@solid-primitives/storage";
 import { createStore } from "solid-js/store";
 import { alice_text } from "./alice";
 
+export type Rectangle = {
+    x: number;
+    y: number;
+    w: number;
+    h: number;
+};
 
 export type Entity = {
     label: string;
     start: number;
     end: number;
+    screen_positions: Rectangle[];
 };
+
 export type Relationship = {
     label: string;
     from: number;
     to: number;
 };
+
 export type active_tool = {
     type: "none"
-}|{
+} | {
     type: "create-entity"
     label: string;
 } | {
@@ -57,9 +66,9 @@ export const [state, set_state] = makePersisted(
             ],
 
             selected_ranges: [
-                { start: 8, end: 25    , label: "Character" },
-                { start: 150, end: 220 , label: "Character" },
-                { start: 350, end: 360 , label: "Character" },
+                { start: 8, end: 25    , label: "Character", screen_positions:[] },
+                { start: 150, end: 220 , label: "Character", screen_positions:[] },
+                { start: 350, end: 360 , label: "Character", screen_positions:[] },
             ],
             connected_ranges: [
                 { from: 0, to: 1, label:"Is related to"},

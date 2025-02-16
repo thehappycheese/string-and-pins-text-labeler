@@ -4,7 +4,7 @@ import { compute_bezier_between_boxes } from "../util/compute_bezier_between_box
 import { draw_bezier_with_arrow } from "../util/draw_bezier_with_arrow";
 import { range_to_canvas_rect as range_to_canvas_rects } from "../util/range";
 import { offset_within_top_node } from "../util/offset_within_top_node";
-import { Entity, Relationship } from "../state";
+import { Entity, Rectangle, Relationship } from "../state";
 import { css } from "solid-styled-components";
 import { createScrollPosition } from "@solid-primitives/scroll";
 
@@ -20,6 +20,7 @@ export const TextHost: Component<
 > = props => {
 
     const [all_mounted, set_all_mounted] = createSignal(false);
+    const [entity_rects, set_entity_rects] = createSignal<Rectangle[][]>([]);
 
     let host_ref!: HTMLDivElement;
 
@@ -47,12 +48,7 @@ export const TextHost: Component<
         }}
     ></canvas> as HTMLCanvasElement;
 
-
     const canvas_size = createElementSize(canvas_showing_relationships);
-
-
-    
-
 
     const update_canvas = () => {
         console.log("canvas update");
@@ -76,6 +72,18 @@ export const TextHost: Component<
         //         ctx.fill();
         //     }
         // }
+        
+        // instead update the screen positions of the selected ranges
+        const new_positions = [];
+        for (const range of props.selected_ranges()) {
+            const range_rects = range_to_canvas_rects(
+                text_with_selections,
+                canvas_showing_relationships,
+                range
+            );
+            new_positions.push(range_rects);
+        }
+        set_entity_rects(new_positions);
 
         for (const connection of props.connected_ranges()) {
 
@@ -168,25 +176,21 @@ export const TextHost: Component<
                 "z-index": "-1",
             }}
         >{
-            all_mounted() && <For each={props.selected_ranges()}>{selected_range => {
-                debugger
-                const range_rects = range_to_canvas_rects(
-                    text_with_selections,
-                    canvas_showing_relationships,
-                    selected_range
-                );
-                debugger
+            all_mounted() && <For each={entity_rects()}>{rects => {
                 return <>{
-                        range_rects.map(range_rect => <div
-                            class={css`
-                                position: absolute;
-                                top:    ${range_rect.y - scroll_position.y as any}px;
-                                left:   ${range_rect.x - scroll_position.x as any}px;
-                                width:  ${range_rect.width as any}px;
-                                height: ${range_rect.height as any}px;
-                                background-color: rgba(128,128,0,0.5);
-                                border-radius: 5px;
-                            `}></div>)
+                    rects.map( rect => <div
+                        style={{
+                            top:    `${rect.y}px`,
+                            left:   `${rect.x}px`,
+                            width:  `${rect.w}px`,
+                            height: `${rect.h}px`,
+                        }}
+                        class={css`
+                            position: absolute;
+                            background-color: rgba(128,128,0,0.5);
+                            border-radius: 5px;
+                        `}
+                    ></div>)
                 }</>;
             }}</For>
         }</div>
