@@ -2,6 +2,8 @@
   "version": "4",
   "specifiers": {
     "npm:@solid-primitives/resize-observer@^2.1.0": "2.1.0_solid-js@1.9.4__seroval@1.2.0",
+    "npm:@solid-primitives/scroll@^2.1.0": "2.1.0_solid-js@1.9.4__seroval@1.2.0",
+    "npm:@solid-primitives/storage@^4.3.1": "4.3.1_solid-js@1.9.4__seroval@1.2.0",
     "npm:solid-js@^1.9.1": "1.9.4_seroval@1.2.0",
     "npm:solid-styled-components@~0.28.5": "0.28.5_solid-js@1.9.4__seroval@1.2.0_csstype@3.1.3",
     "npm:typescript@^5.5.3": "5.7.2",
@@ -322,8 +324,24 @@
         "solid-js"
       ]
     },
+    "@solid-primitives/scroll@2.1.0_solid-js@1.9.4__seroval@1.2.0": {
+      "integrity": "sha512-MGtQuwgtSSV5cF+QvMmbTRc7BI470CUd7WV1mjlstmgwXvbBARKBan31JRNyeAFmkU/QJoELmfQ+wr+I2RyS1Q==",
+      "dependencies": [
+        "@solid-primitives/event-listener",
+        "@solid-primitives/rootless",
+        "@solid-primitives/static-store",
+        "solid-js"
+      ]
+    },
     "@solid-primitives/static-store@0.1.0_solid-js@1.9.4__seroval@1.2.0": {
       "integrity": "sha512-6Coau0Kv/dF83UQpbBzc+gnJafOQAPe2jCbB4jmTK5UocsR5cWmFBVRm3kin+nZFVaO4WkuELw0cKANWgTVh8Q==",
+      "dependencies": [
+        "@solid-primitives/utils",
+        "solid-js"
+      ]
+    },
+    "@solid-primitives/storage@4.3.1_solid-js@1.9.4__seroval@1.2.0": {
+      "integrity": "sha512-xAJsY2pvXrAaCai4N2grmWY3xh5om9suTDVzGkRF5JBpDzs3Apk+xIovdTErbW0iCzXIEefENXb9xmSzdjuLYA==",
       "dependencies": [
         "@solid-primitives/utils",
         "solid-js"
@@ -631,6 +649,8 @@
     "packageJson": {
       "dependencies": [
         "npm:@solid-primitives/resize-observer@^2.1.0",
+        "npm:@solid-primitives/scroll@^2.1.0",
+        "npm:@solid-primitives/storage@^4.3.1",
         "npm:solid-js@^1.9.1",
         "npm:solid-styled-components@~0.28.5",
         "npm:typescript@^5.5.3",
