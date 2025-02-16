@@ -4,9 +4,8 @@ import { compute_bezier_between_boxes } from "../util/compute_bezier_between_box
 import { draw_bezier_with_arrow } from "../util/draw_bezier_with_arrow";
 import { range_to_canvas_rect as range_to_canvas_rects } from "../util/range";
 import { offset_within_top_node } from "../util/offset_within_top_node";
-import { Entity, Rectangle, Relationship } from "../state";
+import { Entity, Rectangle, Relationship, State } from "../state";
 import { css } from "solid-styled-components";
-import { createScrollPosition } from "@solid-primitives/scroll";
 
 
 export const TextHost: Component<
@@ -16,6 +15,7 @@ export const TextHost: Component<
         selected_ranges: Accessor<Entity[]>;
         connected_ranges: Accessor<Relationship[]>;
         add_selected_range: (range: { start: number; end: number; }) => void;
+        active_tool: Accessor<State["active_tool"]>;
     }
 > = props => {
 
@@ -28,14 +28,17 @@ export const TextHost: Component<
         style={{
             "overflow-y": "scroll",
             "flex-grow": 1,
-            "padding": "0.5em",
+            "padding": "1em 3em",
             "z-index": "0",
             "line-height": "2.5em",
         }}
         innerHTML={props.text_content()}
     ></div> as HTMLDivElement;
 
-    const scroll_position = createScrollPosition(text_with_selections);
+    createEffect(() => {
+        text_with_selections.style.pointerEvents = props.active_tool().type==="create-relationship" ? "none" :"auto";
+        text_with_selections.style.userSelect = props.active_tool().type==="create-relationship" ? "none" :"auto";
+    });
 
     const canvas_showing_relationships = <canvas
         style={{
@@ -130,7 +133,6 @@ export const TextHost: Component<
         console.log("start", start);
         console.log("end", end);
         
-            
         props.add_selected_range({ start, end });
         selection.removeAllRanges();
     };
@@ -176,7 +178,7 @@ export const TextHost: Component<
                 "z-index": "-1",
             }}
         >{
-            all_mounted() && <For each={entity_rects()}>{rects => {
+            all_mounted() && <For each={entity_rects()}>{(rects, index) => {
                 return <>{
                     rects.map( rect => <div
                         style={{
@@ -189,7 +191,34 @@ export const TextHost: Component<
                             position: absolute;
                             background-color: rgba(128,128,0,0.5);
                             border-radius: 5px;
+                            &:hover {
+                                background-color: rgba(128,128,0,0.8);
+                            }
                         `}
+                        // we are going to allow the user to drag and drop these spans onto each other
+                        ondragstart={(e) => {
+                            console.log("drag start", index());
+                            e.dataTransfer?.setData("text/plain", `${index}`);
+                        }}
+                        ondragover={e=>{
+                            e.preventDefault();
+                        }}
+                        draggable={props.active_tool().type==="create-relationship"? true : undefined}
+                        ondrop={e=>{
+                            if(!e.dataTransfer) return;
+                            let active_tool = props.active_tool();
+                            if(active_tool.type !== "create-relationship") return;
+                            e.preventDefault();
+                            const from = e.dataTransfer?.getData("text/plain");
+                            if (from) {
+                                props.connected_ranges().push({
+                                    from: Number(from),
+                                    to: index(),
+                                    label: active_tool.label
+                                });
+                            }
+                        }}
+
                     ></div>)
                 }</>;
             }}</For>

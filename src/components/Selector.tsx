@@ -1,4 +1,4 @@
-import { Component, ParentProps, createSignal, createContext, useContext, Accessor, Signal } from "solid-js";
+import { Component, ParentProps, createSignal, createContext, useContext, Accessor, Signal, Setter } from "solid-js";
 import { css } from "solid-styled-components";
 import { magic_color } from "../util/magic_color";
 
@@ -12,12 +12,12 @@ const SelectorContext = createContext<{
 //     mapSelection: (val: string) => T; // Function to transform selected value into any shape
 //   }>;
 
-export const SelectorHost: Component<ParentProps<{ shared_value?: Signal<string|null> }>> = (props) => {
-    // Use shared state if provided, otherwise create local state
-    const [selected, setSelected] = props.shared_value ?? createSignal<string | null>(null);
-
+export const SelectorHost: Component<ParentProps<{
+    value: Accessor<string|null>
+    set_value: (new_val:string|null)=>void
+}>> = (props) => {
     return (
-        <SelectorContext.Provider value={{ selected, setSelected }}>
+        <SelectorContext.Provider value={{ selected: props.value, setSelected: props.set_value }}>
             <div
                 style={{
                     display: "flex",
@@ -44,7 +44,7 @@ export const SelectorOption: Component<{ text: string; value: string }> = (props
     const ctx = useContext(SelectorContext);
     if (!ctx) throw new Error("SelectorOption must be used within a SelectorHost");
 
-    const isActive = () => ctx.selected() === props.value;
+    const is_active = () => ctx.selected() === props.value;
 
     return (
         <div
@@ -75,7 +75,7 @@ export const SelectorOption: Component<{ text: string; value: string }> = (props
                     height: 1em;
                 `}
             >{
-                isActive()
+                is_active()
                 && <div
                     class={css`
                         border: 3px solid color-mix(in srgb, currentColor 70%, transparent);
@@ -95,7 +95,7 @@ export const SelectorOption: Component<{ text: string; value: string }> = (props
                 }}
             >
 
-                {isActive() && <IconTextSelection />}
+                {is_active() && <IconTextSelection />}
             </div>
         </div>
     );

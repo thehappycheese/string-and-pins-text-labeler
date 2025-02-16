@@ -19,8 +19,7 @@ const MenuHeader = styled("div")`
 export const MainView = styled("div")`
     border-radius: 0.5em;
     border: 1px solid grey;
-    padding: 0.3em 3em;
-    overflow-y: scroll;
+    overflow:hidden;
     
     flex: 1;
     line-height: 1.5em;`;
@@ -83,13 +82,35 @@ function App() {
             >Load Document</button>
             <Portal>{dialog_load_document}</Portal>
             <MenuHeader>Entity</MenuHeader>
-            <SelectorHost shared_value={[()=>(state.active_tool as any).label, new_val=>set_state("active_tool", new_val as any)]}>
+            <SelectorHost
+                value={()=>state.active_tool.type !=="create-entity"? null : state.active_tool.label}
+                set_value={new_val=>set_state(
+                    "active_tool",
+                    new_val===null
+                    ?{type:"none"}
+                    :{
+                        type:"create-entity",
+                        label: new_val
+                    }
+                )}
+            >
                 <For each={state.entity_labels}>{entity_label=>
                     <SelectorOption text={entity_label} value={`E-${entity_label}`}/>
                 }</For>
             </SelectorHost>
             <MenuHeader>Connect</MenuHeader>
-            <SelectorHost shared_value={[()=>(state.active_tool as any).label, new_val=>set_state("active_tool", new_val as any)]}>
+            <SelectorHost
+                value={()=>state.active_tool.type !=="create-relationship"? null : state.active_tool.label}
+                set_value={new_val=>set_state(
+                    "active_tool",
+                    new_val===null
+                    ?{type:"none"}
+                    :{
+                        type:"create-relationship",
+                        label: new_val
+                    }
+                )}
+            >
                 <For each={state.relationship_labels}>{relationship_label=>(
                     <SelectorOption text={relationship_label} value={`R-${relationship_label}`}/>
                 )}</For>
@@ -152,6 +173,7 @@ function App() {
                 add_selected_range={(range)=>set_state("selected_ranges", state.selected_ranges.length, range)}
                 connected_ranges={()=>state.connected_ranges}
                 text_content={()=>state.active_document_text}
+                active_tool={()=>state.active_tool}
             />
         </MainView>
     </>

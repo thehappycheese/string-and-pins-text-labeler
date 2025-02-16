@@ -1,20 +1,16 @@
+import { Rectangle } from "../state";
 import { Vector2 } from "./Vector2";
 
-export interface BoundingBox {
-    x: number;
-    y: number;
-    width: number;
-    height: number;
-}
+
 
 export const BoundingBox = {
-    position: (box: BoundingBox): Vector2 => ({ x: box.x, y: box.y }),
-    size: (box: BoundingBox): Vector2 => ({ x: box.width, y: box.height }),
-    center: (box: BoundingBox): Vector2 => ({ x: box.x + box.width / 2, y: box.y + box.height / 2 }),
+    position: (box: Rectangle): Vector2 => ({ x: box.x, y: box.y }),
+    size: (box: Rectangle): Vector2 => ({ x: box.w, y: box.h }),
+    center: (box: Rectangle): Vector2 => ({ x: box.x + box.w / 2, y: box.y + box.h / 2 }),
 }
 
 
-export function compute_bezier_between_boxes(box_a: BoundingBox, box_b: BoundingBox): { start: Vector2; control_1: Vector2; control_2: Vector2; end: Vector2 } {
+export function compute_bezier_between_boxes(box_a: Rectangle, box_b: Rectangle): { start: Vector2; control_1: Vector2; control_2: Vector2; end: Vector2 } {
     const center_a: Vector2 = BoundingBox.center(box_a);
     const center_b: Vector2 = BoundingBox.center(box_b);
     
@@ -22,7 +18,7 @@ export function compute_bezier_between_boxes(box_a: BoundingBox, box_b: Bounding
     const dir: Vector2 = Vector2.unit(Vector2.sub(center_b, center_a));
     
     // Determine which face the line exits each box
-    function get_exit_point(box: BoundingBox, direction: Vector2): Vector2 {
+    function get_exit_point(box: Rectangle, direction: Vector2): Vector2 {
         const half_size: Vector2 = Vector2.scale(BoundingBox.size(box), 0.5);
         const center: Vector2 = Vector2.add(BoundingBox.position(box), half_size);
         
