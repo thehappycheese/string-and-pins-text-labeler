@@ -3,7 +3,7 @@ import { TextHost } from "./components/TextHost";
 import { styled } from "solid-styled-components";
 import { Portal } from "solid-js/web";
 import { For } from "solid-js";
-import { Rectangle, Relationship, set_state, state } from "./state";
+import { set_state, state } from "./state";
 
 
 

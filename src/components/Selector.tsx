@@ -1,4 +1,4 @@
-import { Component, ParentProps, createSignal, createContext, useContext, Accessor, Signal, Setter } from "solid-js";
+import { Component, ParentProps, createContext, useContext, Accessor } from "solid-js";
 import { css } from "solid-styled-components";
 import { magic_color } from "../util/magic_color";
 
