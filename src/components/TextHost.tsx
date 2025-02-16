@@ -1,5 +1,5 @@
 import { createElementSize } from "@solid-primitives/resize-observer";
-import { Component, createEffect, onMount, onCleanup, Signal, Accessor, VoidProps, For, createSignal } from "solid-js";
+import { Component, createEffect, onMount, onCleanup, Accessor, VoidProps, For, createSignal } from "solid-js";
 import { compute_bezier_between_boxes } from "../util/compute_bezier_between_boxes";
 import { draw_bezier_with_arrow } from "../util/draw_bezier_with_arrow";
 import { range_to_canvas_rect as range_to_canvas_rects } from "../util/range";
@@ -109,7 +109,7 @@ export const TextHost: Component<
         }
     };
 
-    const handel_pointer_up = (e: PointerEvent) => {
+    const handel_pointer_up = () => {
         // get the selection and see if we need to update the selected ranges
         const selection = window.getSelection();
         if (!selection) return;
@@ -180,10 +180,10 @@ export const TextHost: Component<
                         range_rects.map(range_rect => <div
                             class={css`
                                 position: absolute;
-                                top:    ${range_rect.y - scroll_position.y}px;
-                                left:   ${range_rect.x - scroll_position.x}px;
-                                width:  ${range_rect.width}px;
-                                height: ${range_rect.height}px;
+                                top:    ${range_rect.y - scroll_position.y as any}px;
+                                left:   ${range_rect.x - scroll_position.x as any}px;
+                                width:  ${range_rect.width as any}px;
+                                height: ${range_rect.height as any}px;
                                 background-color: rgba(128,128,0,0.5);
                                 border-radius: 5px;
                             `}></div>)

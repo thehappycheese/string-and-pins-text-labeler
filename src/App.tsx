@@ -2,7 +2,7 @@ import { SelectorHost, SelectorOption } from "./components/Selector";
 import { TextHost } from "./components/TextHost";
 import { styled } from "solid-styled-components";
 import { Portal } from "solid-js/web";
-import { For, onMount } from "solid-js";
+import { For } from "solid-js";
 import { set_state, state } from "./state";
 
 
@@ -83,13 +83,13 @@ function App() {
             >Load Document</button>
             <Portal>{dialog_load_document}</Portal>
             <MenuHeader>Entity</MenuHeader>
-            <SelectorHost shared_value={[()=>state.active_tool.label, new_val=>set_state("active_tool", new_val)]}>
+            <SelectorHost shared_value={[()=>(state.active_tool as any).label, new_val=>set_state("active_tool", new_val as any)]}>
                 <For each={state.entity_labels}>{entity_label=>
                     <SelectorOption text={entity_label} value={`E-${entity_label}`}/>
                 }</For>
             </SelectorHost>
             <MenuHeader>Connect</MenuHeader>
-            <SelectorHost shared_value={[()=>state.active_tool, new_val=>set_state("active_tool", new_val)]}>
+            <SelectorHost shared_value={[()=>(state.active_tool as any).label, new_val=>set_state("active_tool", new_val as any)]}>
                 <For each={state.relationship_labels}>{relationship_label=>(
                     <SelectorOption text={relationship_label} value={`R-${relationship_label}`}/>
                 )}</For>

@@ -3,7 +3,7 @@ import { Vector2 } from "./Vector2";
 
 
 export const bezier_sample = (p0: Vector2, p1: Vector2, p2: Vector2, p3: Vector2, t: number): Vector2 => {
-    const abx = { x: Math.abs(p3.x - p0.x) * 0.5, y: 0 };
+    //const abx = { x: Math.abs(p3.x - p0.x) * 0.5, y: 0 };
 
     const q0 = Vector2.lerp(p0, p1, t);
     const q1 = Vector2.lerp(p1, p2, t);
