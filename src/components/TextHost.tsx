@@ -141,7 +141,15 @@ export const TextHost: Component<
         // TODO: can probs compute screen positions here too
 
         
-        props.add_selected_range({ start, end, label: active_tool.label, screen_positions:[]});
+        props.add_selected_range({
+            start,
+            end,
+            label: active_tool.label,
+            screen_positions:[],
+            text:range.toString(),
+            deleted:false,
+            attributes:{}
+        });
         selection.removeAllRanges();
     };
 
@@ -221,10 +229,13 @@ export const TextHost: Component<
                             e.preventDefault();
                             const from = e.dataTransfer?.getData("text/plain");
                             if (from) {
+                                // TODO: prevent repeating the same connection
                                 props.connect_ranges({
                                     from: Number(from),
                                     to: index(),
-                                    label: active_tool.label
+                                    label: active_tool.label,
+                                    deleted:false,
+                                    attributes:[],
                                 });
                             }
                         }}

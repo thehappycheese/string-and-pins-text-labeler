@@ -2,8 +2,11 @@ import { SelectorHost, SelectorOption } from "./components/Selector";
 import { TextHost } from "./components/TextHost";
 import { styled } from "solid-styled-components";
 import { Portal } from "solid-js/web";
-import { For } from "solid-js";
-import { set_state, state } from "./state";
+import { Accessor, Component, For, Setter, VoidProps } from "solid-js";
+import { Attribute, set_state, state } from "./state";
+import { DebugTable } from "./components/DebugTable";
+import { ModalStringInput } from "./components/ModalStringInput";
+import { createStore } from "solid-js/store";
 
 
 
@@ -14,7 +17,8 @@ export const Menu = styled("div")`flex:0 1 20em;`;
 const MenuHeader = styled("div")`
     font-size: 1.1em;
     font-weight: bold;
-    margin: 0.5em 0;`;
+    margin: 1em 0em 0.5em 0em;
+    border-bottom:1px solid grey;`;
 
 export const MainView = styled("div")`
     border-radius: 0.5em;
@@ -94,8 +98,8 @@ function App() {
                     }
                 )}
             >
-                <For each={state.entity_labels}>{entity_label=>
-                    <SelectorOption text={entity_label} value={`${entity_label}`}/>
+                <For each={state.entity_templates}>{template=>
+                    <SelectorOption text={template.label} value={`${template.label}`}/>
                 }</For>
             </SelectorHost>
             <MenuHeader>Connect</MenuHeader>
@@ -111,61 +115,24 @@ function App() {
                     }
                 )}
             >
-                <For each={state.relationship_labels}>{relationship_label=>(
-                    <SelectorOption text={relationship_label} value={`${relationship_label}`}/>
+                <For each={state.relationship_templates}>{template=>(
+                    <SelectorOption text={template.label} value={`${template.label}`}/>
                 )}</For>
             </SelectorHost>
-            <button
-                onClick={() => {
-                    set_state(
-                        "selected_ranges",
-                        state.selected_ranges.length,
-                        {start:90, end:100}
-                    );
-                    set_state(
-                        "connected_ranges",
-                        state.connected_ranges.length,
-                        {from:0, to:state.selected_ranges.length-1}
-                    );
-                }}
-            >doop</button>
 
+            <MenuHeader>Debug</MenuHeader>
+            <DebugTable items={state.selected_ranges}  show_index={true} exclude_keys={new Set(["screen_positions"])}/>
+            <DebugTable items={state.connected_ranges} show_index={true}/>
+            <MenuHeader>Debug Actions</MenuHeader>
             <button
                 onClick={() => {
                     localStorage.removeItem("string-and-pins");
                     location.reload();
                 }}
             >Reset</button>
-
-            <table
-                style={{
-                    width: "100%",
-                    "border-collapse": "collapse",
-                    "margin-top": "1em",
-                    "border": "1px solid grey",
-                }}
-            >
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Start</th>
-                        <th>End</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <For each={state.selected_ranges}>{(range, index)=>(
-                        <tr>
-                            <td>{index()}</td>
-                            <td>{range.start}</td>
-                            <td>{range.end}</td>
-                        </tr>
-                    )}</For>
-                </tbody>
-
-            </table>
-
-            
-
+            <div>{
+                JSON.stringify(state.entity_templates)
+            }</div>
         </Menu>
         <MainView>
             <TextHost
@@ -177,7 +144,54 @@ function App() {
                 active_tool={()=>state.active_tool}
             />
         </MainView>
+        <Menu>
+            {
+                state.active_tool.type==="create-entity"&&
+                <For each={
+                    state.entity_templates.find(i=>i.label===(state.active_tool as any).label)?.attributes
+                }>{ (attribute, index) => {
+                    //const [scoped_attribute, set_scoped_attribute] = createStore(attribute);
+                    
+                    return <div>
+                        <PropertyEditor
+                            label={()=>attribute.label}
+                            set_label={new_value=>set_state(
+                                "entity_templates",
+                                i=>i.label===(state.active_tool as any).label,
+                                "attributes",
+                                index(),
+                                "label",
+                                new_value
+                            )}
+                            // label={()=>scoped_attribute.label}
+                            // set_label={v=>set_scoped_attribute("label", v)}
+                            type={"string"}
+                        />
+                        <button>Remove</button>
+                    </div>
+                }}</For>
+            }
+            <hr/>
+            <button>Add Attribute</button>
+        </Menu>
     </>
 }
+
+
+const PropertyEditor:Component<VoidProps<{
+    label:Accessor<string>,
+    set_label:Setter<string>, 
+    type:Attribute["type"]
+}>> = props => <div>
+    <ModalStringInput
+        value={props.label}
+        set_value={props.set_label}
+    />
+    <select>
+        <For each={["string","float","integer","color","date"]}>{
+            i=><option value={i} selected={i===props.type}>{i}</option>
+        }</For>
+    </select>
+</div>
 
 export default App;

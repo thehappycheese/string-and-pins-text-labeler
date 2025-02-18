@@ -1,0 +1,15 @@
+.debug_table{
+    font-size: 80%;;
+    width:100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+    border: 1px solid grey;
+    th{
+        text-align: right;
+        border:1px solid grey;
+    }
+    td{
+        text-align: right;
+        border:1px solid grey;
+    }
+}

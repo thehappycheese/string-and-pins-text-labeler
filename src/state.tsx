@@ -11,18 +11,33 @@ export type Rectangle = {
 
 export type Entity = {
     label: string;
+    text: string;
     start: number;
     end: number;
+    attributes:object;
     screen_positions: Rectangle[];
+    deleted:boolean;
 };
 
 export type Relationship = {
     label: string;
     from: number;
     to: number;
+    attributes:object;
+    deleted:boolean;
 };
 
-export type active_tool = {
+export type ItemWithAttributes = {
+    label:string,
+    attributes:Attribute[]
+}
+export type Attribute = {
+    label:string;
+    type:"string"|"boolean"|"number"|"date"|"color";
+}
+
+
+export type ActiveTool = {
     type: "none"
 } | {
     type: "create-entity"
@@ -38,9 +53,9 @@ export type active_tool = {
 
 export type State = {
     active_document_text: string;
-    active_tool: active_tool;
-    entity_labels: string[];
-    relationship_labels: string[];
+    active_tool: ActiveTool;
+    entity_templates: ItemWithAttributes[];
+    relationship_templates: ItemWithAttributes[];
     selected_ranges: Entity[];
     connected_ranges: Relationship[];
 };
@@ -51,31 +66,58 @@ export const [state, set_state] = makePersisted(
             active_document_text: alice_text,
             active_tool: {
                 type: "create-entity",
-                label: "Character"
+                label: "Person"
             },
 
-            entity_labels: [
-                "Character",
-                "Location",
-                "Event",
+            entity_templates: [
+                {
+                    label:"Person",
+                    attributes:[
+                        {
+                            label:"Name",
+                            type:"string",
+                        }
+                    ],
+                },
+                {
+                    label:"Place",
+                    attributes:[],
+                },
+                {
+                    label:"Thing",
+                    attributes:[],
+                },
+                {
+                    label:"Time",
+                    attributes:[],
+                },
+                {
+                    label:"Event",
+                    attributes:[],
+                },
             ],
 
-            relationship_labels: [
-                "Is in",
-                "Is related to",
+            relationship_templates: [
+                {
+                    label:"Is in",
+                    attributes:[]
+                },
+                {
+                    label:"Related To",
+                    attributes:[]
+                }
             ],
 
             selected_ranges: [
-                { start: 8, end: 25    , label: "Character", screen_positions:[] },
-                { start: 150, end: 220 , label: "Character", screen_positions:[] },
-                { start: 350, end: 360 , label: "Character", screen_positions:[] },
+                
             ],
             connected_ranges: [
-                { from: 0, to: 1, label:"Is related to"},
-                { from: 1, to: 0, label:"Is related to"},
-                { from: 1, to: 2, label:"Is related to"},
+
             ]
         }
     ),
-    { name: "string-and-pins" }
+    { 
+        name: "string-and-pins",
+        
+    }
 );
