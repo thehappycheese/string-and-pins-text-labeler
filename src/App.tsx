@@ -2,11 +2,11 @@ import { SelectorHost, SelectorOption } from "./components/Selector";
 import { TextHost } from "./components/TextHost";
 import { styled } from "solid-styled-components";
 import { Portal } from "solid-js/web";
-import { Accessor, Component, For, Setter, VoidProps } from "solid-js";
-import { Attribute, set_state, state } from "./state";
+import { For, Show } from "solid-js";
+import { set_state, state } from "./state";
 import { DebugTable } from "./components/DebugTable";
-import { ModalStringInput } from "./components/ModalStringInput";
-import { createStore } from "solid-js/store";
+import { PropertyEditor } from "./components/PropertyEditor";
+import { produce } from "solid-js/store";
 
 
 
@@ -141,57 +141,59 @@ function App() {
                 connected_ranges={()=>state.connected_ranges}
                 connect_ranges={new_rel=>set_state("connected_ranges", state.connected_ranges.length, new_rel)}
                 text_content={()=>state.active_document_text}
-                active_tool={()=>state.active_tool}
+                    active_tool={()=>state.active_tool}
             />
         </MainView>
         <Menu>
             {
-                state.active_tool.type==="create-entity"&&
-                <For each={
-                    state.entity_templates.find(i=>i.label===(state.active_tool as any).label)?.attributes
-                }>{ (attribute, index) => {
-                    //const [scoped_attribute, set_scoped_attribute] = createStore(attribute);
-                    
-                    return <div>
-                        <PropertyEditor
-                            label={()=>attribute.label}
-                            set_label={new_value=>set_state(
-                                "entity_templates",
-                                i=>i.label===(state.active_tool as any).label,
-                                "attributes",
-                                index(),
-                                "label",
-                                new_value
-                            )}
-                            // label={()=>scoped_attribute.label}
-                            // set_label={v=>set_scoped_attribute("label", v)}
-                            type={"string"}
-                        />
-                        <button>Remove</button>
-                    </div>
-                }}</For>
+                <Show when={state.active_tool.type==="create-entity"}>
+                    <For each={
+                        state.entity_templates.find(i=>i.label===(state.active_tool as any).label)?.attributes
+                    }>{ (attribute, index) => {
+                        
+                        return <div>
+                            <PropertyEditor
+                                label={()=>attribute.label}
+                                set_label={new_value=>set_state(produce(state =>
+                                    state.entity_templates
+                                    .filter(i=>i.label===(state.active_tool as any).label)
+                                    .forEach(i=>i.attributes[index()].label=new_value)
+                                ))}
+                                type={attribute.type}
+                                set_type={new_type=>{
+                                    set_state(produce(state=>{
+                                        state.entity_templates
+                                        .filter(i=>i.label===(state.active_tool as any).label)
+                                        .forEach(i=>i.attributes[index()].type = new_type);
+                                    }))
+                                }}
+                                on_remove={()=>{
+                                    set_state(produce(state=>{
+                                        state.entity_templates
+                                        .filter(i=>i.label===(state.active_tool as any).label)
+                                        .forEach(entity_template=>entity_template.attributes.splice(index(),1));
+                                    }))
+                                }}
+                            />
+                        </div>
+                    }}</For>
+                    <hr/>
+                    <button
+                        onClick={()=>set_state(produce(state=>state
+                            .entity_templates
+                            .filter(i=>i.label===(state.active_tool as any).label)
+                            .forEach(attr=>attr.attributes.push({
+                                label:`Attribute-${attr.attributes.length}`,
+                                type:"string"
+                            }))
+                        ))}
+                    >➕</button>
+                </Show>
             }
-            <hr/>
-            <button>Add Attribute</button>
+            
         </Menu>
     </>
 }
 
-
-const PropertyEditor:Component<VoidProps<{
-    label:Accessor<string>,
-    set_label:Setter<string>, 
-    type:Attribute["type"]
-}>> = props => <div>
-    <ModalStringInput
-        value={props.label}
-        set_value={props.set_label}
-    />
-    <select>
-        <For each={["string","float","integer","color","date"]}>{
-            i=><option value={i} selected={i===props.type}>{i}</option>
-        }</For>
-    </select>
-</div>
 
 export default App;

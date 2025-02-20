@@ -3,7 +3,6 @@ import {
     Component,
     createEffect,
     createSignal,
-    Setter,
     VoidProps,
 } from "solid-js";
 import styles from "./ModalStringInput.module.css";
@@ -11,7 +10,7 @@ import styles from "./ModalStringInput.module.css";
 export const ModalStringInput: Component<
     VoidProps<{
         value: Accessor<string>;
-        set_value: Setter<string>;
+        set_value:(new_value:string)=>void;
     }>
 > = (props) => {
     const [temp_value, set_temp_value] = createSignal(props.value());
@@ -34,7 +33,7 @@ export const ModalStringInput: Component<
         <input
             value={temp_value()}
             onInput={(e) => set_temp_value(e.target.value)}
-            onBlur={() => close_and_apply}
+            onBlur={close_and_apply}
             onKeyDown={(e) => {
                 if (e.key === "Enter") {
                     close_and_apply();
@@ -43,13 +42,14 @@ export const ModalStringInput: Component<
                 }
             }}
         />
-    );
+    ) as HTMLInputElement;
 
     createEffect(() => {
         if (in_edit_mode()) {
             inp.focus();
         }
     });
+
     return (
         <div
             class={styles.main}

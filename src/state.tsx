@@ -31,9 +31,12 @@ export type ItemWithAttributes = {
     label:string,
     attributes:Attribute[]
 }
+
+export const ATTRIBUTE_TYPES = ["string","boolean","number","date","color"] as const;
+
 export type Attribute = {
     label:string;
-    type:"string"|"boolean"|"number"|"date"|"color";
+    type:(typeof ATTRIBUTE_TYPES)[number];
 }
 
 
@@ -51,6 +54,16 @@ export type ActiveTool = {
     type:"remove-relationship"
 };
 
+export type Selection = {
+    type: "none"
+} | {
+    type: "entity",
+    index: number
+} | {
+    type:"relationship",
+    index: number
+}
+
 export type State = {
     active_document_text: string;
     active_tool: ActiveTool;
@@ -58,6 +71,7 @@ export type State = {
     relationship_templates: ItemWithAttributes[];
     selected_ranges: Entity[];
     connected_ranges: Relationship[];
+    selection: Selection
 };
 
 export const [state, set_state] = makePersisted(
@@ -107,6 +121,10 @@ export const [state, set_state] = makePersisted(
                     attributes:[]
                 }
             ],
+
+            selection:{
+                type:"none"
+            },
 
             selected_ranges: [
                 
